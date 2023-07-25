@@ -12,14 +12,76 @@ var wrong = new Audio('sounds/wrong.mp3');
 var yellow = new Audio('sounds/yellow.mp3');
 
 
+var started = false;
+
+var level = 0;
+
+$(document).keypress(function() {
+    
+    if(!started){
+        $("#level-title").text("Level " + level);
+        nextSequence();
+        started = true;
+    }
+
+})
 
 function nextSequence() {
+
+    userClickedPattern = [];
+
+    level++;
+    $("#level-title").text("Level " +level);
     var randomNumber = Math.floor(Math.random() * 4);
     var randomChosenColour = buttonColours[randomNumber];
     gamePattern.push(randomChosenColour);
     $("#" + randomChosenColour).fadeOut(100).fadeIn(100);
     playSound(randomChosenColour);
+
 }
+
+
+
+$(".btn").on("click", function(e){
+    
+    var userChosenColour = e.target.id;
+    userClickedPattern.push(userChosenColour);
+    console.log(userClickedPattern);
+    playSound(userChosenColour);
+    animatePress(userChosenColour);
+    checkAnswer(userClickedPattern.length-1);
+})
+
+function checkAnswer(currentLevel){
+
+    if(gamePattern[currentLevel] === userClickedPattern[currentLevel]){
+        
+
+        if(userClickedPattern.length === gamePattern.length) {
+            setTimeout(function () {
+                nextSequence();
+            }, 1000);
+        }
+
+    }
+    else{
+        wrong.play();
+        $("body").addClass("game-over");
+        setTimeout(function(){
+            $("body").removeClass("game-over")
+        },200 );
+        $("#level-title").text("Game Over, Press Any Key to Restart");
+        startOver();
+    }
+
+}
+
+function startOver(){
+    level = 0;
+    gamePattern = [];
+    started = false;
+}
+
 
 function playSound(name){
     switch(name){
@@ -41,13 +103,15 @@ function playSound(name){
     }
 }
 
+function animatePress(currentColour) {
+    
+    var activeColour = document.querySelector("." + currentColour);
+    activeColour.classList.add("pressed");
 
-$(".btn").on("click", function(e){
-    
-    var userChosenColour = e.target.id;
-    userClickedPattern.push(userChosenColour);
-    console.log(userClickedPattern);
-    playSound(userChosenColour);
-    
-})
+    setTimeout(function(){
+        activeColour.classList.remove("pressed")
+    }, 100);
+
+}
+
 
